@@ -114,7 +114,7 @@ def _(mo, np):
 
     # Kernel selection dropdown
     options = ["Average Blur", "Sharpen", "Sobel X", "Sobel Y", "Gaussian Blur", "Laplacian", "Edge Detection", "Custom"]
-    selected = mo.ui.dropdown(options, value="Average Blur", label="Select Kernel")
+    selected = mo.ui.dropdown(options, value="Average Blur", label="")
 
     # Style the UI with HTML and CSS, escaping curly braces
     html_template = """
@@ -191,9 +191,6 @@ def _(mo, np):
         for j in range(3)
     ])
     ui_html = mo.md(html_template.format(dropdown=selected, custom_inputs=custom_inputs))
-
-    # Output UI
-    ui_html
     return (
         average_kernel,
         edge_kernel,
