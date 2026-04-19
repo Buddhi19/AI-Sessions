@@ -1,53 +1,52 @@
 import marimo
 
-__generated_with = "0.13.11"
+__generated_with = "0.20.2"
 app = marimo.App(width="medium")
 
 
 @app.cell
 def _():
-    import os
     import sys
+    from pathlib import Path
 
-    main_dir = os.path.abspath(os.path.dirname(os.getcwd()))
-    sys.path.append(main_dir)
+    notebook_dir = Path(__file__).resolve().parent
+    sessions_dir = notebook_dir.parent
+    sys.path.append(str(sessions_dir))
 
     import marimo as mo
     import polars as pl
     import numpy as np
     import cv2 as cv
     import matplotlib.pyplot as plt
-    return cv, main_dir, mo, np, os, plt
+
+    return Path, cv, mo, notebook_dir, np, plt, sessions_dir
 
 
 @app.cell
-def _(main_dir, mo, os):
-    src_example = os.path.join(
-        main_dir, "2025-09-01-Kurunagala-Sri-Lanka","public","cnn.png"
-    )
+def _(mo, notebook_dir):
+    src_example = notebook_dir / "public" / "cnn.png"
     mo.image(src_example)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""# What is Convolution""")
+    mo.md(r"""
+    # What is Convolution
+    """)
     return
 
 
 @app.cell
-def _(main_dir, mo, os):
-    src_gif = os.path.join(
-        main_dir, "2025-09-01-Kurunagala-Sri-Lanka","public","cnn.gif.png"
-    )
+def _(mo, notebook_dir):
+    src_gif = notebook_dir / "public" / "cnn.gif.png"
     mo.image(src_gif)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
+    mo.md(r"""
     # It's all simple MATHS
 
     $$
@@ -57,37 +56,32 @@ def _(mo):
     $$
 
     # We continue with this to get,
-    """
-    )
+    """)
     return
 
 
 @app.cell
-def _(main_dir, mo, os):
-    src_gif_rerun = os.path.join(
-        main_dir, "2025-09-01-Kurunagala-Sri-Lanka","public","cnn.gif"
-    )
+def _(mo, notebook_dir):
+    src_gif_rerun = notebook_dir / "public" / "cnn.gif"
     mo.image(src_gif_rerun)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(r"""# Okay now! What is the use if this?""")
+    mo.md(r"""
+    # Okay now! What is the use if this?
+    """)
     return
 
 
 @app.cell
-def _(cv, main_dir, mo, os):
-    cat_png = os.path.join(
-        main_dir, "2025-09-01-Kurunagala-Sri-Lanka","public","cat.png"
-    )
-    img = cv.imread(cat_png, cv.IMREAD_GRAYSCALE)
+def _(cv, mo, notebook_dir):
+    cat_png = notebook_dir / "public" / "cat.png"
+    img = cv.imread(str(cat_png), cv.IMREAD_GRAYSCALE)
 
-    cv.imwrite("cat_bw.png", img)
-    cat_bw_png = os.path.join(
-        main_dir, "2025-09-01-Kurunagala-Sri-Lanka","cat_bw.png"
-    )
+    cat_bw_png = notebook_dir / "cat_bw.png"
+    cv.imwrite(str(cat_bw_png), img)
     mo.hstack([
             mo.vstack([mo.md("**Original**"), mo.image(cat_png, width=300)]),
             mo.vstack([mo.md("**Grayscale**"), mo.image(cat_bw_png, width=300)])
@@ -280,20 +274,27 @@ def _(
     else:
         kernel = edge_kernel
 
-    # Apply convolution
     output_img = cv.filter2D(img, -1, kernel)
+    output_img_twice = cv.filter2D(output_img, -1, kernel)
+    output_img_thrice = cv.filter2D(output_img_twice, -1, kernel)
 
     # Display kernel values
     kernel_display = format_kernel(kernel)
 
     # Visualize
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+    fig, axs = plt.subplots(1, 4, figsize=(22, 5))
     axs[0].imshow(img, cmap="gray")
     axs[0].axis("off")
     axs[0].set_title("Original Image", fontsize=16)
     axs[1].imshow(output_img, cmap="gray")
     axs[1].axis("off")
-    axs[1].set_title("Convolved Image", fontsize=16)
+    axs[1].set_title("After 1 Convolution", fontsize=16)
+    axs[2].imshow(output_img_twice, cmap="gray")
+    axs[2].axis("off")
+    axs[2].set_title("After 2 Convolutions", fontsize=16)
+    axs[3].imshow(output_img_thrice, cmap="gray")
+    axs[3].axis("off")
+    axs[3].set_title("After 3 Convolutions", fontsize=16)
     plt.tight_layout()
 
     # Output controls, kernel display, and plot
@@ -302,6 +303,76 @@ def _(
         kernel_display,
         *controls,
         fig
+    ])
+    return (kernel,)
+
+
+@app.cell
+def _(cv, notebook_dir):
+    dog_png = notebook_dir / "public" / "dog.png"
+    dog_img = cv.imread(str(dog_png), cv.IMREAD_GRAYSCALE)
+    return (dog_img,)
+
+
+@app.cell
+def _(cv, dog_img, kernel, mo, plt, selected):
+    dog_output_img = cv.filter2D(dog_img, -1, kernel)
+    dog_output_img_twice = cv.filter2D(dog_output_img, -1, kernel)
+    dog_output_img_thrice = cv.filter2D(dog_output_img_twice, -1, kernel)
+
+    dog_fig, dog_axes = plt.subplots(1, 4, figsize=(22, 5))
+    dog_axes[0].imshow(dog_img, cmap="gray")
+    dog_axes[0].axis("off")
+    dog_axes[0].set_title("Original Dog", fontsize=16)
+    dog_axes[1].imshow(dog_output_img, cmap="gray")
+    dog_axes[1].axis("off")
+    dog_axes[1].set_title("After 1 Convolution", fontsize=16)
+    dog_axes[2].imshow(dog_output_img_twice, cmap="gray")
+    dog_axes[2].axis("off")
+    dog_axes[2].set_title("After 2 Convolutions", fontsize=16)
+    dog_axes[3].imshow(dog_output_img_thrice, cmap="gray")
+    dog_axes[3].axis("off")
+    dog_axes[3].set_title("After 3 Convolutions", fontsize=16)
+    plt.tight_layout()
+
+    mo.vstack([
+        mo.md(f"**Dog image with the current kernel: {selected.value}**"),
+        dog_fig
+    ])
+    return
+
+
+@app.cell
+def _(cv, notebook_dir):
+    bird_png = notebook_dir / "public" / "bird.png"
+    bird_img = cv.imread(str(bird_png), cv.IMREAD_GRAYSCALE)
+    return (bird_img,)
+
+
+@app.cell
+def _(bird_img, cv, kernel, mo, plt, selected):
+    bird_output_img = cv.filter2D(bird_img, -1, kernel)
+    bird_output_img_twice = cv.filter2D(bird_output_img, -1, kernel)
+    bird_output_img_thrice = cv.filter2D(bird_output_img_twice, -1, kernel)
+
+    bird_fig, bird_axes = plt.subplots(1, 4, figsize=(22, 5))
+    bird_axes[0].imshow(bird_img, cmap="gray")
+    bird_axes[0].axis("off")
+    bird_axes[0].set_title("Original Bird", fontsize=16)
+    bird_axes[1].imshow(bird_output_img, cmap="gray")
+    bird_axes[1].axis("off")
+    bird_axes[1].set_title("After 1 Convolution", fontsize=16)
+    bird_axes[2].imshow(bird_output_img_twice, cmap="gray")
+    bird_axes[2].axis("off")
+    bird_axes[2].set_title("After 2 Convolutions", fontsize=16)
+    bird_axes[3].imshow(bird_output_img_thrice, cmap="gray")
+    bird_axes[3].axis("off")
+    bird_axes[3].set_title("After 3 Convolutions", fontsize=16)
+    plt.tight_layout()
+
+    mo.vstack([
+        mo.md(f"**Bird image with the current kernel: {selected.value}**"),
+        bird_fig
     ])
     return
 
